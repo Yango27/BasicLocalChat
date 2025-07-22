@@ -12,21 +12,29 @@ def send_file_data(s : socket.socket):
     f.seek(0,2) #goes to the end of the file 
     size = f.tell() 
     msg = f'File Name : {f.name}, Size (bytes): {size}'
+    s.recv(1024) #waits the other side for sending the file's data
     s.sendall(msg.encode("utf-8", errors="ignore")) #sends the file information to the other side
     f.seek(0)
     return f
 
 def send_file(file , s : socket.socket):
-    data = s.recv(1024).decode("utf-8", errors="ignore")
     chunk = file.read(4096) 
-    while chunk != b"":
+    while chunk != b"": #while is not completely sent
         s.sendall(chunk) #sending the file's bytes chunk by chunk
         chunk = file.read(4096)
-        data = s.recv(1024).decode("utf-8", errors="ignore") 
     print("File sent!")
     file.close()
 
+def manage_send_file_response(file, s : socket.socket, data : str):
+    if data == "Accepted":
+        print("The other side accepted the file transfer :)")
+        send_file(file, s)
+    else:
+        print("The other side rejected the file transfer :(")
+        file.close()
+
 def manage_send_file_req(s):
+    s.sendall("Go on".encode("utf-8", errors="ignore")) #tells the other side to send the file's data
     data = s.recv(1024) #here we want to wait for the file data
     data = data.decode("utf-8", errors="ignore")
     print("You received a file transfer request!")
@@ -55,14 +63,12 @@ def manage_send_file_req(s):
     return msg, f, size, transferingFile
 
 def receive_file(f, s : socket.socket , size : int):
-    s.sendall("START".encode("utf-8", errors="ignore"))
     try:
         bytesRead = 0
         while bytesRead < size:
             chunk = s.recv(min(4096, size-bytesRead)) #normally a chunk size would be 4096, the only exception could be last one
             f.write(chunk)
             bytesRead += len(chunk)
-            s.sendall("continue".encode("utf-8", errors="ignore"))
         print("File received!")
     finally:
         f.close()
