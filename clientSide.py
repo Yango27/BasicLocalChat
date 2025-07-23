@@ -6,8 +6,11 @@ PORT = int(input("Enter the port server is using for this chat: "))
 try:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect((HOST,PORT))
-
+        transferingFile = False
         while True:
+            if transferingFile:
+                featuresChat.receive_file(file,sock,size)
+                transferingFile = False
             msg = ""
             while (msg == ""):
                 msg = input("Enter the message you want to send to Server (can't be empty): ")
@@ -19,6 +22,8 @@ try:
             data = data.decode("utf-8", errors="ignore")
             if msg == "/sendfile":
                 featuresChat.manage_send_file_response(file, sock, data)
+            if data == "/sendfile":
+                msg, file, size, transferingFile = featuresChat.manage_send_file_req(sock)
             elif not data or data.lower() == "exit":
                 break
             else:
