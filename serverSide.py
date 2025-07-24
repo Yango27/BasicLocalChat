@@ -21,7 +21,7 @@ try:
                     data = data.decode('utf-8', errors="ignore")
                     if msg == "/sendfile":
                         featuresChat.manage_send_file_response(file, conn, data)
-                    if not data or data.lower() == "exit":
+                    elif not data or data.lower() == "exit":
                         break
                     elif data == "/sendfile":
                         msg, file, size, transferingFile = featuresChat.manage_send_file_req(conn)

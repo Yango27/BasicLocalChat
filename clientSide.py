@@ -24,6 +24,7 @@ try:
                 featuresChat.manage_send_file_response(file, sock, data)
             if data == "/sendfile":
                 msg, file, size, transferingFile = featuresChat.manage_send_file_req(sock)
+                sock.sendall(msg.encode("utf-8", errors="ignore"))
             elif not data or data.lower() == "exit":
                 break
             else:
